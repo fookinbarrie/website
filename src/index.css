@@ -1,0 +1,368 @@
+@import "tailwindcss";
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to bottom, #2a0b4a 0%, #140a3a 55%, #07051a 100%);
+  background-attachment: fixed;
+}
+
+:root {
+  --app-bg: #07051a;
+  --app-fg: rgba(255, 220, 250, 0.92);
+  --card-bg: #fbfbfa;
+  --card-border: rgba(234, 128, 176, 0.62);
+  --card-fg: #3f3f46;
+  --card-muted: #a1a1aa;
+
+  --control-bg: rgba(8, 4, 18, 0.55);
+  --control-border: rgba(234, 128, 176, 0.55);
+
+  --dot: rgba(234, 128, 176, 0.22);
+}
+
+.theme-darkpink {
+  background: linear-gradient(to bottom, #2a0b4a 0%, #140a3a 55%, #07051a 100%);
+  background-attachment: fixed;
+  color: var(--app-fg);
+}
+
+/* Make react-flow background transparent so gradient shows through */
+.theme-darkpink .react-flow,
+.theme-darkpink .react-flow__pane {
+  background: transparent !important;
+}
+
+/* React Flow: keep controls readable on dark background */
+.theme-darkpink .react-flow__controls-button {
+  background: var(--control-bg);
+  border-color: var(--control-border);
+  color: var(--app-fg);
+}
+
+.theme-darkpink .react-flow__controls-button:hover {
+  background: rgba(8, 4, 18, 0.88);
+}
+
+.theme-darkpink .react-flow__controls-button svg {
+  fill: currentColor;
+}
+
+/* Scale semua card dan dekorasi ke 2/3 ukuran asli */
+.react-flow__node > * {
+  transform: scale(0.667);
+  transform-origin: top left;
+}
+
+/* PhotoBox album slider */
+.photobox-slider {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge legacy */
+}
+
+.photobox-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.photobox-slide {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  border-radius: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PASSWORD PAGE
+═══════════════════════════════════════════════════════════ */
+
+.password-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  overflow: hidden;
+  z-index: 9999;
+  transition: opacity 2s ease;
+}
+.pw-exit { opacity: 0; pointer-events: none; }
+
+.pw-ui {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: min(980px, 96vw);
+}
+
+/* ── title (pixel-ish) ────────────────────────────────────────── */
+.pw-title-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  padding: 0;
+}
+
+.pw-title {
+  margin: 0;
+  text-align: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.05;
+  max-width: min(980px, 92vw);
+  font-size: clamp(28px, 6.2vw, 84px);
+  color: rgba(255, 220, 250, 0.95);
+  text-transform: uppercase;
+  transform: perspective(900px) rotateX(32deg) skewX(-10deg);
+  -webkit-text-stroke: 2px rgba(234, 128, 176, 0.78);
+  text-shadow:
+    3px 0 rgba(234, 128, 176, 0.78),
+    -3px 0 rgba(234, 128, 176, 0.78),
+    0 3px rgba(234, 128, 176, 0.78),
+    0 -3px rgba(234, 128, 176, 0.78),
+    4px 0 rgba(192, 132, 252, 0.45),
+    -4px 0 rgba(192, 132, 252, 0.45),
+    0 4px rgba(192, 132, 252, 0.45),
+    0 -4px rgba(192, 132, 252, 0.45),
+    12px 16px rgba(0, 0, 0, 0.40);
+}
+
+.pw-title-line {
+  display: block;
+  white-space: nowrap;
+}
+
+/* ── bottom form strip ────────────────────────────────────────── */
+.pw-form {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+/* Pixel-ish form UI */
+.pw-input,
+.pw-btn {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: geometricPrecision;
+  letter-spacing: 0.14em;
+}
+
+.pw-input {
+  width: min(340px, 72vw);
+  padding: 12px 16px;
+  border-radius: 0;
+  border: 2px solid rgba(234, 128, 176, 0.62);
+  background: rgba(8, 4, 18, 0.70);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  font-size: 14px;
+  color: #f9f9f9;
+  outline: none;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  box-shadow:
+    2px 2px 0 rgba(0,0,0,0.45),
+    4px 4px 0 rgba(0,0,0,0.22);
+  text-shadow:
+    1px 0 rgba(0,0,0,0.35),
+    -1px 0 rgba(0,0,0,0.35),
+    0 1px rgba(0,0,0,0.35),
+    0 -1px rgba(0,0,0,0.35);
+}
+.pw-input::placeholder {
+  color: rgba(255,255,255,0.25);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+.pw-input:focus {
+  border-color: rgba(234, 128, 176, 0.95);
+  box-shadow:
+    2px 2px 0 rgba(0,0,0,0.45),
+    4px 4px 0 rgba(0,0,0,0.22),
+    0 0 0 4px rgba(234, 128, 176, 0.12),
+    0 0 22px rgba(234,128,176,0.20);
+}
+
+.pw-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 0;
+  background: rgba(234, 128, 176, 0.18);
+  border: 6px solid rgba(234, 128, 176, 0.70);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  color: #f9a8d4;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  flex-shrink: 0;
+  box-shadow:
+    3px 3px 0 rgba(0,0,0,0.50),
+    6px 6px 0 rgba(0,0,0,0.22);
+}
+.pw-btn-heart {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+.pw-btn:hover {
+  background: rgba(234, 128, 176, 0.30);
+  box-shadow:
+    4px 4px 0 rgba(0,0,0,0.50),
+    8px 8px 0 rgba(0,0,0,0.22),
+    0 0 18px rgba(234,128,176,0.36),
+    0 0 38px rgba(192,132,252,0.10);
+  transform: translate(-1px, -1px);
+}
+.pw-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow:
+    1px 1px 0 rgba(0,0,0,0.50),
+    2px 2px 0 rgba(0,0,0,0.22);
+}
+
+.pw-warn {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: geometricPrecision;
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 0;
+  border: 2px solid rgba(234, 128, 176, 0.62);
+  background: rgba(8, 4, 18, 0.70);
+  color: rgba(255, 220, 250, 0.92);
+  font-size: 12px;
+  letter-spacing: 0.10em;
+  box-shadow:
+    2px 2px 0 rgba(0,0,0,0.45),
+    4px 4px 0 rgba(0,0,0,0.22);
+}
+
+/* ── Mini Player ── */
+.mini-player {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(234, 128, 176, 0.45);
+  background: rgba(8, 4, 18, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  max-width: 320px;
+}
+.mini-player-cover {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.mini-player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.mini-player-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(234, 128, 176, 0.75);
+  line-height: 1;
+}
+.mini-player-title {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(255, 220, 250, 0.92);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mini-player-btn {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(234, 128, 176, 0.5);
+  background: rgba(234, 128, 176, 0.15);
+  color: rgba(255, 220, 250, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.mini-player-btn:hover {
+  background: rgba(234, 128, 176, 0.3);
+  border-color: rgba(234, 128, 176, 0.8);
+}
+.mini-player-btn:active {
+  transform: scale(0.93);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+}
+.input-shake .pw-input { animation: shake 0.5s ease; }
+
+/* ── Game (UFO shooter) fullscreen ────────────────────────────── */
+.game-canvas-fullscreen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: crosshair;
+  image-rendering: pixelated;
+  z-index: 5;
+}
+
+/* ── Fade-in after game ───────────────────────────────────────── */
+.pw-ui-fadein {
+  opacity: 0;
+  transform: translateY(24px) scale(0.96);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.pw-ui-fadein.pw-ui-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
