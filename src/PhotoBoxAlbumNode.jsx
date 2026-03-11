@@ -12,7 +12,6 @@ export default function PhotoBoxAlbumNode({ data }) {
   const indexRef = useRef(0);
   const lastInteractionRef = useRef(0);
   const gap = 12;
-
   const slides = useMemo(() => (photos.length ? photos : [null]), [photos]);
 
   const scrollToIndex = useCallback(

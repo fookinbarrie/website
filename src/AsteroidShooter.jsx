@@ -258,7 +258,7 @@ function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
 }
 
 // ─── Component ────────────────────────────────────────────────────────────
-export default function AsteroidShooter({ onComplete }) {
+export default function AsteroidShooter({ onComplete, onStart }) {
   const canvasRef = useRef(null);
   const stateRef = useRef(null);
   const keysRef = useRef(new Set());
@@ -276,6 +276,7 @@ export default function AsteroidShooter({ onComplete }) {
     const handler = (e) => {
       e.preventDefault();
       setStarted(true);
+      if (onStart) onStart();
     };
     window.addEventListener('keydown', handler);
     window.addEventListener('click', handler);
@@ -285,7 +286,7 @@ export default function AsteroidShooter({ onComplete }) {
       window.removeEventListener('click', handler);
       window.removeEventListener('touchstart', handler);
     };
-  }, [started]);
+  }, [started, onStart]);
 
   // Computed sizes based on PS
   const rocketW = ROCKET_COLS * PS;
@@ -356,7 +357,7 @@ export default function AsteroidShooter({ onComplete }) {
     if (!started) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
     let lastTs = null;
 
     const resize = () => {
@@ -732,10 +733,11 @@ export default function AsteroidShooter({ onComplete }) {
         ctx.fillStyle = '#fce7f3';
         ctx.shadowColor = 'rgba(255, 107, 157, 0.9)';
         ctx.shadowBlur = 30;
-        ctx.fillText('\u{1F382} \🎂 HAPPY BIRTHDAY 🎂 \u{1F382}', W / 2, H / 2 - bdSz * 0.8);
-        ctx.font = `bold ${Math.max(22, Math.floor(bdSz * 0.7))}px monospace`;
+        ctx.fillText('\u{1F382} 🎂 HAPPY BIRTHDAY 🎂 \u{1F382}', W / 2, H / 2 - bdSz * 1.0);
+        ctx.font = `bold ${Math.max(20, Math.floor(bdSz * 0.6))}px monospace`;
         ctx.fillStyle = '#f9a8d4';
-        ctx.fillText('sayangkuuu', W / 2, H / 2 - bdSz * 0.05);
+        ctx.fillText('¡Feliz cumpleaños número 20,', W / 2, H / 2 - bdSz * 0.1);
+        ctx.fillText('Syafara amor mío!', W / 2, H / 2 + bdSz * 0.65);
         ctx.font = `${Math.max(14, Math.floor(bdSz * 0.4))}px monospace`;
         ctx.fillStyle = 'rgba(255, 220, 250, 0.75)';
       }
@@ -789,103 +791,10 @@ export default function AsteroidShooter({ onComplete }) {
           alignItems: 'center', justifyContent: 'center',
           fontFamily: 'monospace', color: '#fce7f3',
           cursor: 'pointer', userSelect: 'none',
-          background: '#0a0a1a',
+          background: 'transparent',
           overflow: 'hidden',
         }}>
-          {/* Animated pixel-art arcade background */}
-          <canvas
-            ref={(cvs) => {
-              if (!cvs || cvs._arcadeInit) return;
-              cvs._arcadeInit = true;
-              const ctx = cvs.getContext('2d');
-              const resize = () => { cvs.width = window.innerWidth; cvs.height = window.innerHeight; };
-              resize();
-              window.addEventListener('resize', resize);
-
-              // Stars
-              const stars = Array.from({ length: 80 }, () => ({
-                x: Math.random() * 2000,
-                y: Math.random() * 2000,
-                s: Math.random() * 2.5 + 1,
-                sp: Math.random() * 0.4 + 0.1,
-                blink: Math.random() * Math.PI * 2,
-              }));
-
-              // Pixel grid lines
-              const gridSize = 48;
-
-              let frame = 0;
-              const loop = () => {
-                if (!cvs.isConnected) return;
-                frame++;
-                const W = cvs.width, H = cvs.height;
-                ctx.clearRect(0, 0, W, H);
-
-                // Dark gradient bg
-                const grad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.7);
-                grad.addColorStop(0, '#12091f');
-                grad.addColorStop(1, '#060410');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, W, H);
-
-                // Pixel grid (subtle)
-                ctx.strokeStyle = 'rgba(255, 107, 157, 0.04)';
-                ctx.lineWidth = 1;
-                const offsetY = (frame * 0.3) % gridSize;
-                for (let y = -gridSize + offsetY; y < H + gridSize; y += gridSize) {
-                  ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-                }
-                for (let x = 0; x < W; x += gridSize) {
-                  ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-                }
-
-                // Scanlines
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.06)';
-                for (let y = 0; y < H; y += 4) {
-                  ctx.fillRect(0, y, W, 2);
-                }
-
-                // Stars moving down slowly
-                for (const st of stars) {
-                  st.y += st.sp;
-                  st.blink += 0.03;
-                  if (st.y > H + 10) { st.y = -10; st.x = Math.random() * W; }
-                  if (st.x > W) st.x -= W;
-                  const alpha = 0.4 + 0.6 * Math.abs(Math.sin(st.blink));
-                  const size = Math.round(st.s);
-                  // Pixel-style square stars
-                  ctx.fillStyle = `rgba(255, 220, 250, ${alpha})`;
-                  ctx.fillRect(Math.round(st.x), Math.round(st.y), size, size);
-                  // Glow
-                  ctx.fillStyle = `rgba(255, 107, 157, ${alpha * 0.25})`;
-                  ctx.fillRect(Math.round(st.x) - 1, Math.round(st.y) - 1, size + 2, size + 2);
-                }
-
-                // Floating pixel UFOs in background (decorative)
-                const t = frame * 0.008;
-                for (let i = 0; i < 4; i++) {
-                  const ux = (W * 0.15 + i * W * 0.22 + Math.sin(t + i * 1.8) * 50) % W;
-                  const uy = (H * 0.2 + i * H * 0.18 + Math.cos(t * 0.7 + i * 2.3) * 30 + frame * 0.15) % H;
-                  const ps = 3;
-                  ctx.globalAlpha = 0.12;
-                  // Simple 5-pixel wide UFO shape
-                  ctx.fillStyle = '#4ade80';
-                  ctx.fillRect(Math.round(ux) + ps, Math.round(uy), ps * 3, ps);
-                  ctx.fillStyle = '#94a3b8';
-                  ctx.fillRect(Math.round(ux), Math.round(uy) + ps, ps * 5, ps);
-                  ctx.fillStyle = '#facc15';
-                  ctx.fillRect(Math.round(ux) + ps, Math.round(uy) + ps * 2, ps * 3, ps);
-                  ctx.globalAlpha = 1;
-                }
-
-                requestAnimationFrame(loop);
-              };
-              requestAnimationFrame(loop);
-            }}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0 }}
-          />
-
-          {/* Content (on top of bg) */}
+          {/* Content */}
           <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <h1 style={{ fontSize: 'clamp(28px, 5vw, 56px)', margin: 0, color: '#ff6b9d', textShadow: '0 0 20px rgba(255,107,157,0.6), 0 0 60px rgba(255,107,157,0.2)' }}>
               🚀 SELAMATKAN DUNIA!!! 🛸

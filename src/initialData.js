@@ -51,7 +51,7 @@ const contentNodes = [
   {
     id: 'n-letter',
     type: 'text',
-    position: { x: -304, y: 359 },
+    position: { x: -336, y: 359 },
     data: {
       date: '02 March 2025',
       content: [
@@ -66,7 +66,7 @@ const contentNodes = [
   {
     id: 'n-love1',
     type: 'note',
-    position: { x: -430, y: 36 },
+    position: { x: -396, y: 36 },
     data: {
       bg: '#fef9c3',
       rotate: '-3deg',
@@ -140,7 +140,7 @@ const contentNodes = [
   {
     id: 'n-photobox',
     type: 'photobox',
-    position: { x: -612, y: 236 },
+    position: { x: -592, y: 238 },
     data: {
       title: 'photobox',
       photos: ['/photobox/1.jpg', '/photobox/2.jpg', '/photobox/3.jpg', '/photobox/4.jpg', '/photobox/5.jpg'],
@@ -153,7 +153,7 @@ const contentNodes = [
   {
     id: 'n-img',
     type: 'sticker',
-    position: { x: 167, y: 498 },
+    position: { x: 163, y: 508 },
     zIndex: 10,
     data: {
       url: '/stickers/kirby.gif',
@@ -165,7 +165,9 @@ const contentNodes = [
   {
     id: 'n-candle',
     type: 'sticker',
-    position: { x: -278, y: 138 },    zIndex: 10,    data: {
+    position: { x: -294, y: 60 },
+    zIndex: 10,
+    data: {
       url: '/stickers/20.png',
       width: 540,
       shadow: false,
@@ -175,7 +177,9 @@ const contentNodes = [
   {
     id: 'n-flowers',
     type: 'sticker',
-    position: { x: 306, y: 13 },    zIndex: 10,    data: {
+    position: { x: 280, y: 19 },
+    zIndex: 10,
+    data: {
       url: '/stickers/flowers.png',
       width: 600,
       shadow: false,
@@ -214,7 +218,7 @@ const contentNodes = [
   {
     id: 'n-meme',
     type: 'youtube',
-    position: { x: -729, y: -33 },
+    position: { x: -729, y: -49 },
     data: {
       title: 'meme',
       url: 'https://youtube.com/shorts/xXmpxt5bnk4?si=qaYq3i98417tUr-r',
@@ -244,7 +248,7 @@ const contentNodes = [
   {
     id: 'n-cat',
     type: 'sticker',
-    position: { x: -242, y: 64 },
+    position: { x: -182, y: -8 },
     zIndex: 10,
     data: {
       url: '/stickers/cat.png',

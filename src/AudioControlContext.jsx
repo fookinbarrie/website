@@ -12,6 +12,7 @@ export function AudioControlProvider({ children }) {
   const externalReasonsRef = useRef(new Set());
 
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
   const [externallyPaused, setExternallyPaused] = useState(false);
   const srcRef = useRef(PRIMARY_TRACK_SRC);
 
@@ -41,6 +42,11 @@ export function AudioControlProvider({ children }) {
     try { audio.currentTime = 0; } catch { /* ignore */ }
     audio.play().then(() => { startedRef.current = true; }).catch(() => {});
   }, []);
+
+  const unlock = useCallback(() => {
+    setIsUnlocked(true);
+    startMusic();
+  }, [startMusic]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -117,13 +123,15 @@ export function AudioControlProvider({ children }) {
   const value = useMemo(
     () => ({
       isPlaying,
+      isUnlocked,
       externallyPaused,
       toggle,
       pauseFor,
       resumeFor,
       startMusic,
+      unlock,
     }),
-    [externallyPaused, isPlaying, pauseFor, resumeFor, toggle, startMusic]
+    [externallyPaused, isPlaying, isUnlocked, pauseFor, resumeFor, toggle, startMusic, unlock]
   );
 
   return (
@@ -136,7 +144,7 @@ export function AudioControlProvider({ children }) {
         style={{ display: 'none' }}
       />
 
-      {!externallyPaused && (
+      {!externallyPaused && isUnlocked && (
         <div className="mini-player">
           <img
             className="mini-player-cover"
