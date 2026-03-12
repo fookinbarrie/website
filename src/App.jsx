@@ -18,6 +18,8 @@ import StickerNode from './StickerNode';
 import ScrapBackgroundSpawner from './ScrapBackgroundSpawner';
 import { initialNodes, initialEdges } from './initialData';
 import { useAudioControl } from './AudioControlContext';
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const nodeTypes = {
   text: TextNode,
@@ -155,6 +157,8 @@ function App() {
           onGameComplete={() => setScrapbookReady(true)}
         />
       )}
+      <Analytics />
+      <SpeedInsights />
     </>
   );
 }
