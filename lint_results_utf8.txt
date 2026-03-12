@@ -1,0 +1,13 @@
+﻿
+> web-ultah@0.0.0 lint
+> eslint .
+
+
+C:\ALBARRY\passion and essentials\syafara amor mio website\web-ultah\src\ScrapBackgroundSpawner.jsx
+  180:6  warning  React Hook useEffect has a missing dependency: 'active'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\ALBARRY\passion and essentials\syafara amor mio website\web-ultah\src\canvasConstellations.js
+  33:9  error  'glyphRadius' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+Γ£û 2 problems (1 error, 1 warning)
+

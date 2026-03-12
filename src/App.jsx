@@ -3,6 +3,7 @@ import ReactFlow, { Background, BackgroundVariant, Controls, applyNodeChanges, a
 import 'reactflow/dist/style.css';
 
 import PasswordPage from './PasswordPage';
+import NyanCursor from './NyanCursor';
 import TextNode from './TextNode';
 import SpotifyNode from './SpotifyNode';
 import SpotifyStackNode from './SpotifyStackNode';
@@ -14,6 +15,7 @@ import ListNode from './ListNode';
 import YouTubeNode from './YouTubeNode';
 import PhotoBoxAlbumNode from './PhotoBoxAlbumNode';
 import StickerNode from './StickerNode';
+import ScrapBackgroundSpawner from './ScrapBackgroundSpawner';
 import { initialNodes, initialEdges } from './initialData';
 import { useAudioControl } from './AudioControlContext';
 
@@ -43,20 +45,31 @@ function App() {
   const [draggable, setDraggable] = useState(false);
   const centeredRef = useRef(false);
 
+  // ReactFlow is mounted ONLY after game ends (password phase onward).
+  // During the asteroid game: NOT mounted → zero event bleed-through.
+  // After game win: mounted silently behind password UI → smooth reveal on transition.
+  const [scrapbookReady, setScrapbookReady] = useState(false);
+
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
     []
   );
 
-  // Cheat codes — "433": log & copy positions, "open": unlock dragging
+  const onEdgesChange = useCallback(
+    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+    []
+  );
+
+  // Cheat codes
   const nodesRef = useRef(nodes);
-  nodesRef.current = nodes;
+  useEffect(() => {
+    nodesRef.current = nodes;
+  }, [nodes]);
   useEffect(() => {
     const buf = { current: '' };
     const onKey = (e) => {
       if (e.key.length !== 1) return;
       buf.current = (buf.current + e.key.toLowerCase()).slice(-5);
-      // "433" → log & copy positions
       if (buf.current.slice(-3) === '433') {
         const output = nodesRef.current
           .map((n) => `${n.id}: { x: ${Math.round(n.position.x)}, y: ${Math.round(n.position.y)} }`)
@@ -67,13 +80,11 @@ function App() {
         });
         buf.current = '';
       }
-      // "open" → unlock dragging
       if (buf.current.endsWith('open')) {
         setDraggable(true);
         alert('🔓 Node dragging unlocked!');
         buf.current = '';
       }
-      // "kocak" → bypass password & game, go straight to main
       if (buf.current.endsWith('kocak')) {
         buf.current = '';
         unlock();
@@ -83,33 +94,37 @@ function App() {
     return () => window.removeEventListener('keydown', onKey);
   }, [unlock]);
 
-  const onEdgesChange = useCallback(
-    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
-    []
-  );
+  const onInit = useCallback((instance) => {
+    if (centeredRef.current) return;
+    centeredRef.current = true;
+    setTimeout(() => instance.setCenter(15, 8, { zoom: 0.85, duration: 0 }), 80);
+  }, []);
 
   return (
     <>
-      {!isUnlocked ? (
-        <PasswordPage onUnlock={unlock} />
-      ) : (
-        <div className="w-screen h-screen theme-darkpink">
+      {/* Scrapbook – only mount after game is done so it can't steal events during gameplay */}
+      {(scrapbookReady || isUnlocked) && (
+        <div
+          className="w-screen h-screen theme-darkpink"
+          style={{ pointerEvents: isUnlocked ? 'auto' : 'none' }}
+        >
+          {isUnlocked && <NyanCursor />}
           <ReactFlow
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             nodeTypes={nodeTypes}
-            nodesDraggable={draggable}
+            nodesDraggable={isUnlocked ? draggable : false}
             defaultEdgeOptions={defaultEdgeOptions}
-            onInit={(instance) => {
-              if (centeredRef.current) return;
-              centeredRef.current = true;
-              // Center viewport on n-hero (position -102,-4, ~374×400 card)
-              setTimeout(() => {
-                instance.setCenter(15, 8, { zoom: 0.85, duration: 0 });
-              }, 80);
-            }}
+            onInit={onInit}
+            panOnDrag={isUnlocked}
+            panOnScroll={false}
+            zoomOnScroll={isUnlocked}
+            zoomOnPinch={isUnlocked}
+            zoomOnDoubleClick={false}
+            selectionOnDrag={false}
+            preventScrolling={isUnlocked}
           >
             <Background
               id="diary-dots"
@@ -120,7 +135,16 @@ function App() {
             />
             <Controls />
           </ReactFlow>
+          <ScrapBackgroundSpawner active={isUnlocked} />
         </div>
+      )}
+
+      {/* Password overlay – fixed on top, fades away during transition */}
+      {!isUnlocked && (
+        <PasswordPage
+          onUnlock={unlock}
+          onGameComplete={() => setScrapbookReady(true)}
+        />
       )}
     </>
   );

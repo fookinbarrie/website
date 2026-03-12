@@ -17,33 +17,37 @@ export function drawTaurus(ctx, t, taurus) {
   const clamp01 = (v) => Math.max(0, Math.min(1, v));
   const scale = taurus._scale || 1;
   const pulse = 0.45 + 0.35 * Math.sin(t * 0.9);
-  let lineAlpha = 0.22 + 0.10 * pulse;
-  let starAlpha = 0.92 + 0.24 * pulse;
-  lineAlpha = clamp01(lineAlpha * Math.min(2, scale));
-  starAlpha = clamp01(starAlpha * Math.min(2, scale));
+  let lineAlpha = 0.35 + 0.15 * pulse; // Boldened alpha
+  let starAlpha = 0.95 + 0.15 * pulse;
+  
+  // Set thicker line logic like Kirby
+  ctx.lineWidth = 1.2 * scale;
 
   for (const [u, v] of taurus.lines) {
     const p1 = taurus.pts[u];
     const p2 = taurus.pts[v];
-    drawDottedLine(ctx, p1.x, p1.y, p2.x, p2.y, '255,220,245', lineAlpha);
+    // Bold dotted line
+    drawDottedLine(ctx, p1.x, p1.y, p2.x, p2.y, '255,240,255', lineAlpha);
   }
 
-  const glyphRadius = Math.max(1, Math.round(1 + (scale - 1) * 2));
+  const glyphRadius = Math.max(1, Math.round(1.5 * scale)); // Slightly larger stars
   for (const key of Object.keys(taurus.pts)) {
     const { x, y } = taurus.pts[key];
-    const bright = key === 'alde' ? 1.35 : 1.05;
+    const bright = key === 'alde' ? 1.5 : 1.1;
     const a = clamp01(starAlpha * bright);
-    ctx.fillStyle = `rgba(255,245,255,${a})`;
+    ctx.fillStyle = `rgba(255,255,255,${a})`;
 
-    for (let dy = -glyphRadius; dy <= glyphRadius; dy++) {
-      for (let dx = -glyphRadius; dx <= glyphRadius; dx++) {
-        ctx.fillRect(x + dx, y + dy, 1, 1);
-      }
-    }
+    // Thicker stars like Kirby
+    const r = glyphRadius;
+    ctx.fillRect(x, y, 1, 1);
+    ctx.fillRect(x - r, y, 1, 1);
+    ctx.fillRect(x + r, y, 1, 1);
+    ctx.fillRect(x, y - r, 1, 1);
+    ctx.fillRect(x, y + r, 1, 1);
 
-    if (((x + y + Math.floor(t * 2)) % 7) === 0) {
-      ctx.fillStyle = `rgba(255,245,255,${clamp01(a * 0.9)})`;
-      const s = Math.max(2, glyphRadius + 1);
+    if (key === 'alde' || ((x + y + Math.floor(t * 2)) % 6) === 0) {
+      ctx.fillStyle = `rgba(255,255,255,${clamp01(a * 0.7)})`;
+      const s = 2;
       ctx.fillRect(x - s, y, 1, 1);
       ctx.fillRect(x + s, y, 1, 1);
       ctx.fillRect(x, y - s, 1, 1);
@@ -54,18 +58,19 @@ export function drawTaurus(ctx, t, taurus) {
 
 export function makeTaurus(w, h) {
   const toXY = (nx, ny) => ({ x: Math.floor(nx * w), y: Math.floor(ny * h) });
+  // Original position, scaled 1.1x
   const pts = {
-    a: toXY(0.86, 0.12),
-    b: toXY(0.89, 0.14),
-    c: toXY(0.93, 0.16),
-    d: toXY(0.87, 0.18),
-    e: toXY(0.91, 0.20),
-    alde: toXY(0.84, 0.15),
-    p1: toXY(0.95, 0.06),
-    p2: toXY(0.98, 0.08),
-    p3: toXY(0.96, 0.10),
-    p4: toXY(0.99, 0.10),
-    p5: toXY(0.97, 0.05),
+    a: toXY(0.85, 0.11),
+    b: toXY(0.89, 0.13),
+    c: toXY(0.94, 0.15),
+    d: toXY(0.86, 0.19),
+    e: toXY(0.92, 0.22),
+    alde: toXY(0.82, 0.14),
+    p1: toXY(0.95, 0.04),
+    p2: toXY(0.98, 0.06),
+    p3: toXY(0.97, 0.09),
+    p4: toXY(0.99, 0.11),
+    p5: toXY(0.96, 0.03),
   };
   const lines = [
     ['alde', 'a'], ['a', 'b'], ['b', 'c'], ['a', 'd'], ['d', 'e'], ['c', 'p3'],

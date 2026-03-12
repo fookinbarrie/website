@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Handle, Position } from 'reactflow';
 
 export default function PhotoBoxAlbumNode({ data }) {
-  const photos = Array.isArray(data?.photos) ? data.photos : [];
   const width = Number.isFinite(Number(data?.width)) ? Number(data.width) : 320;
   // Matches your sample photobox aspect (~768x994)
   const height = Number.isFinite(Number(data?.height)) ? Number(data.height) : 414;
@@ -12,7 +11,10 @@ export default function PhotoBoxAlbumNode({ data }) {
   const indexRef = useRef(0);
   const lastInteractionRef = useRef(0);
   const gap = 12;
-  const slides = useMemo(() => (photos.length ? photos : [null]), [photos]);
+  const slides = useMemo(() => {
+    const photos = Array.isArray(data?.photos) ? data.photos : [];
+    return photos.length ? photos : [null];
+  }, [data]);
 
   const scrollToIndex = useCallback(
     (nextIndex) => {

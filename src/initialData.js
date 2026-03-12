@@ -2,7 +2,7 @@
 // Posisi dari drag manual user — 100% akurat
 const decorations = [
   { id: 'd1', emoji: '⭐️', x: 97, y: -266 },
-  { id: 'd2', emoji: '🌸', x: -683, y: 208 },
+  { id: 'd2', emoji: '🌸', x: -714, y: 215 },
   { id: 'd3', emoji: '✨', x: -411, y: 571 },
   { id: 'd4', emoji: '🎀', x: -738, y: -308 },
   { id: 'd5', emoji: '🩷', x: 15, y: 8 },
@@ -66,7 +66,7 @@ const contentNodes = [
   {
     id: 'n-love1',
     type: 'note',
-    position: { x: -396, y: 36 },
+    position: { x: -407, y: 69 },
     data: {
       bg: '#fef9c3',
       rotate: '-3deg',
@@ -140,7 +140,7 @@ const contentNodes = [
   {
     id: 'n-photobox',
     type: 'photobox',
-    position: { x: -592, y: 238 },
+    position: { x: -620, y: 228 },
     data: {
       title: 'photobox',
       photos: ['/photobox/1.jpg', '/photobox/2.jpg', '/photobox/3.jpg', '/photobox/4.jpg', '/photobox/5.jpg'],
@@ -165,7 +165,7 @@ const contentNodes = [
   {
     id: 'n-candle',
     type: 'sticker',
-    position: { x: -294, y: 60 },
+    position: { x: -315, y: 106 },
     zIndex: 10,
     data: {
       url: '/stickers/20.png',
@@ -218,7 +218,7 @@ const contentNodes = [
   {
     id: 'n-meme',
     type: 'youtube',
-    position: { x: -729, y: -49 },
+    position: { x: -733, y: -55 },
     data: {
       title: 'meme',
       url: 'https://youtube.com/shorts/xXmpxt5bnk4?si=qaYq3i98417tUr-r',
@@ -248,7 +248,7 @@ const contentNodes = [
   {
     id: 'n-cat',
     type: 'sticker',
-    position: { x: -182, y: -8 },
+    position: { x: -179, y: -2 },
     zIndex: 10,
     data: {
       url: '/stickers/cat.png',

@@ -177,6 +177,7 @@ export function AudioControlProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAudioControl() {
   const ctx = useContext(AudioControlContext);
   return ctx;

@@ -18,26 +18,33 @@ const PS = 6; // pixel scale for sprites — BIG chunky pixel art
 const GAME_AUDIO_SRC = '/audio/game-bgm.mp3'; // ← GANTI DENGAN FILE AUDIO GAME KAMU
 
 // ─── Sprites ──────────────────────────────────────────────────────────────
-// Rocket facing RIGHT (7 rows × 12 cols)
 const ROCKET_SPRITE = [
-  '........NN..',
-  '..FBBBBBNNN.',
-  '.FFBBWBBBNN.',
-  'XXEBBBBBBBN.',
-  '.FFBBWBBBNN.',
-  '..FBBBBBNNN.',
-  '........NN..',
+  [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0], // Ujung moncong
+  [0, 0, 0, 0, 0, 0, 1, 2, 2, 1, 0, 0, 0, 0, 0, 0], // Moncong pesawat
+  [0, 0, 0, 0, 0, 0, 1, 3, 3, 1, 0, 0, 0, 0, 0, 0], // Aksen pink di moncong
+  [0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0], // Bodi depan
+  [0, 0, 0, 0, 0, 1, 2, 4, 4, 2, 1, 0, 0, 0, 0, 0], // Kaca kokpit depan
+  [0, 0, 0, 0, 1, 3, 2, 4, 4, 2, 3, 1, 0, 0, 0, 0], // Kokpit & pangkal sayap pink
+  [0, 0, 0, 0, 1, 3, 2, 2, 2, 2, 3, 1, 0, 0, 0, 0], // Bodi tengah
+  [0, 0, 0, 1, 3, 3, 1, 2, 2, 1, 3, 3, 1, 0, 0, 0], // Sayap mulai melebar
+  [0, 0, 1, 3, 3, 3, 1, 2, 2, 1, 3, 3, 3, 1, 0, 0], // Sayap utama pink
+  [0, 1, 3, 3, 2, 2, 2, 1, 1, 2, 2, 2, 3, 3, 1, 0], // Bodi belakang & ujung sayap
+  [1, 3, 3, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 3, 3, 1], // Detail lekukan sayap
+  [1, 3, 2, 2, 1, 0, 1, 3, 3, 1, 0, 1, 2, 2, 3, 1], // Meriam sayap & aksen mesin
+  [1, 2, 2, 1, 0, 0, 1, 3, 3, 1, 0, 0, 1, 2, 2, 1], // Ujung laras meriam
+  [1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1], // Garis tutup bodi belakang
+  [0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0], // Api thruster utama
+  [0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0]  // Ekor api thruster
 ];
-const ROCKET_COLS = 12;
-const ROCKET_ROWS = 7;
+const ROCKET_COLS = 16;
+const ROCKET_ROWS = 16;
 
 const ROCKET_COLORS = {
-  N: '#ff6b9d',
-  B: '#e8e0f0',
-  W: '#7dd3fc',
-  F: '#f472b6',
-  E: '#9ca3af',
-  X: '#ff8c00',
+  1: '#ffffff', // Outline
+  2: '#ff6b9d', // Main Pink
+  3: '#be185d', // Pink Accent
+  4: '#7dd3fc', // Cockpit
+  5: '#fbbf24', // Thruster Fire (Amber/Yellow)
 };
 
 // Pixel-art heart for HUD lives (9×8, big chunky pixels)
@@ -90,12 +97,15 @@ const UFO_COLORS = {
   L: '#facc15',
   A: '#64748b',
 };
+
 const UFO_COLORS_ELITE = {
   G: '#ef4444',
-  D: '#78716c',
-  L: '#fb923c',
-  A: '#dc2626',
+  D: '#b91c1c',
+  L: '#fca5a5',
+  A: '#7f1d1d',
 };
+
+
 
 const EXPLOSION_FRAMES = [
   ['...x...', '..xxx..', '.xxxxx.', 'xxxxxxx', '.xxxxx.', '..xxx..', '...x...'],
@@ -223,7 +233,7 @@ function drawSprite(ctx, sprite, x, y, scale, colorMap, time) {
   for (let r = 0; r < sprite.length; r++) {
     for (let c = 0; c < sprite[r].length; c++) {
       const ch = sprite[r][c];
-      if (ch === '.') continue;
+      if (ch === '.' || ch === 0) continue;
       let color = colorMap[ch] || '#fff';
       if (ch === 'X' && time) {
         color = Math.sin(time * 20 + c * 3) > 0 ? '#ffe066' : '#ff8c00';
@@ -264,33 +274,36 @@ export default function AsteroidShooter({ onComplete, onStart }) {
   const keysRef = useRef(new Set());
   const rafRef = useRef(null);
   const touchRef = useRef({ active: false, y: 0 });
-  const [kills, setKills] = useState(0);
-  const [lives, setLives] = useState(MAX_LIVES);
+  const [, setKills] = useState(0);
+  const [, setLives] = useState(MAX_LIVES);
   const [gameOver, setGameOver] = useState(false);
-  const [won, setWon] = useState(false);
+  const [, setWon] = useState(false);
   const [started, setStarted] = useState(false);
 
   // Pre-game: wait for any key/tap to start
+  // Delay 400ms so React/ReactFlow mount events don't accidentally trigger start
   useEffect(() => {
     if (started) return;
+    let timer;
     const handler = (e) => {
       e.preventDefault();
       setStarted(true);
       if (onStart) onStart();
     };
-    window.addEventListener('keydown', handler);
-    window.addEventListener('click', handler);
-    window.addEventListener('touchstart', handler, { passive: false });
+    timer = setTimeout(() => {
+      window.addEventListener('keydown', handler);
+      window.addEventListener('click', handler);
+      window.addEventListener('touchstart', handler, { passive: false });
+    }, 400);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('keydown', handler);
       window.removeEventListener('click', handler);
       window.removeEventListener('touchstart', handler);
     };
   }, [started, onStart]);
 
-  // Computed sizes based on PS
-  const rocketW = ROCKET_COLS * PS;
-  const rocketH = ROCKET_ROWS * PS;
+
 
   // ─── State init ─────────────────────────────────────────────────────────
   const initState = useCallback((W, H) => ({
@@ -301,6 +314,8 @@ export default function AsteroidShooter({ onComplete, onStart }) {
     bullets: [],
     bulletCooldown: 0,
     bulletRate: 0.13,
+    burstRemaining: 5,
+    burstCooldown: 0,
     ufos: [],
     enemyBullets: [],
     spawnTimer: 0.5,
@@ -327,7 +342,7 @@ export default function AsteroidShooter({ onComplete, onStart }) {
   // ─── Keyboard ───────────────────────────────────────────────────────────
   useEffect(() => {
     const onDown = (e) => {
-      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d',' '].includes(e.key)) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd', ' '].includes(e.key)) {
         e.preventDefault();
         keysRef.current.add(e.key);
       }
@@ -357,7 +372,7 @@ export default function AsteroidShooter({ onComplete, onStart }) {
     if (!started) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d', { alpha: false });
+    const ctx = canvas.getContext('2d');
     let lastTs = null;
 
     const resize = () => {
@@ -411,12 +426,20 @@ export default function AsteroidShooter({ onComplete, onStart }) {
 
         // ─── Shooting ─────────────────
         st.bulletCooldown -= dt;
-        if (keys.has(' ') && st.bulletCooldown <= 0) {
+        st.burstCooldown -= dt;
+
+        if (keys.has(' ') && st.bulletCooldown <= 0 && st.burstCooldown <= 0) {
           st.bullets.push({
             x: st.px + rW,
             y: st.py + rH / 2 - PS,
           });
           st.bulletCooldown = st.bulletRate;
+          st.burstRemaining--;
+
+          if (st.burstRemaining <= 0) {
+            st.burstRemaining = 5;
+            st.burstCooldown = 0.5; // ~2 beats delay
+          }
           sfxShoot();
         }
 
@@ -427,30 +450,37 @@ export default function AsteroidShooter({ onComplete, onStart }) {
           if (st.bullets[i].x > W + 20) st.bullets.splice(i, 1);
         }
 
-        // ─── Spawn UFOs ──────────────
-        st.spawnTimer -= dt;
-        if (st.spawnTimer <= 0) {
-          const si = Math.floor(Math.random() * UFO_SPRITES.length);
-          const sprite = UFO_SPRITES[si];
-          const uw = sprite[0].length * PS;
-          const uh = sprite.length * PS;
-          const isElite = st.kills >= 10 && Math.random() < 0.35 + (st.kills - 10) * 0.03;
-          const baseSpeed = 70 + Math.random() * 50 + st.kills * 4;
-
-          st.ufos.push({
-            x: W + 10,
-            y: Math.random() * (H - uh - 40) + 20,
-            speed: isElite ? baseSpeed * 1.4 : baseSpeed,
-            sprite, w: uw, h: uh,
-            elite: isElite,
-            shootTimer: 0.6 + Math.random() * 1.0,
-            shootInterval: Math.max(0.45, 2.0 - st.kills * 0.1) * (isElite ? 0.45 : 1),
-            vDrift: (Math.random() - 0.5) * 65,
-            seed: Math.floor(Math.random() * 1000),
-          });
-          st.spawnInterval = Math.max(0.25, 1.6 - st.kills * 0.075);
-          st.spawnTimer = st.spawnInterval;
+        // ─── Spawn UFOs ────────────────────────────────────────────────────────────
+        if (st.kills < TARGET_KILLS) {
+          st.spawnTimer -= dt;
+          if (st.spawnTimer <= 0) {
+            const si = Math.floor(Math.random() * UFO_SPRITES.length);
+            const sprite = UFO_SPRITES[si];
+            const uw = sprite[0].length * PS;
+            const uh = sprite.length * PS;
+            const isElite = st.kills >= 10 && Math.random() < 0.35 + (st.kills - 10) * 0.03;
+            const baseSpeed = 70 + Math.random() * 50 + st.kills * 4;
+            const alienHp = st.kills > 10 ? (isElite ? 4 : 3) : (isElite ? 3 : 2);
+            st.ufos.push({
+              x: W + 10,
+              y: Math.random() * (H - uh - 40) + 20,
+              speed: isElite ? baseSpeed * 1.4 : baseSpeed,
+              sprite, w: uw, h: uh,
+              elite: isElite,
+              hp: alienHp,
+              hpMax: alienHp,
+              shootTimer: 0.6 + Math.random() * 1.0,
+              shootInterval: Math.max(0.45, 2.0 - st.kills * 0.1) * (isElite ? 0.45 : 1),
+              vDrift: (Math.random() - 0.5) * 65,
+              seed: Math.floor(Math.random() * 1000),
+            });
+            st.spawnInterval = Math.max(0.25, 1.6 - st.kills * 0.075);
+            st.spawnTimer = st.spawnInterval;
+          }
         }
+
+
+
 
         // ─── Update invincibility ─────
         st.invincibleTimer = Math.max(0, st.invincibleTimer - dt);
@@ -497,6 +527,13 @@ export default function AsteroidShooter({ onComplete, onStart }) {
           }
 
           if (hit) {
+            u.hp--;
+            if (u.hp > 0) {
+              // Shield flash for elite on 1st hit
+              st.explosions.push({ x: u.x + u.w * 0.3, y: u.y + u.h * 0.3, age: 0, shield: true });
+              sfxHit();
+              continue;
+            }
             st.explosions.push({ x: u.x, y: u.y, age: 0 });
             sfxExplode();
             for (let p = 0; p < 10; p++) {
@@ -513,9 +550,7 @@ export default function AsteroidShooter({ onComplete, onStart }) {
             st.kills++;
             setKills(st.kills);
             if (st.kills >= TARGET_KILLS) {
-              st.won = true;
-              setWon(true);
-              sfxWin();
+              st.won = true; setWon(true); sfxWin();
               setTimeout(() => onComplete(), 4500);
             }
             continue;
@@ -523,7 +558,7 @@ export default function AsteroidShooter({ onComplete, onStart }) {
 
           // UFO → Player collision
           if (st.invincibleTimer <= 0 &&
-              rectsOverlap(st.px, st.py, rW, rH, u.x, u.y, u.w, u.h)) {
+            rectsOverlap(st.px, st.py, rW, rH, u.x, u.y, u.w, u.h)) {
             st.lives--;
             setLives(st.lives);
             st.invincibleTimer = INVINCIBLE_TIME;
@@ -544,7 +579,7 @@ export default function AsteroidShooter({ onComplete, onStart }) {
             continue;
           }
           if (st.invincibleTimer <= 0 &&
-              rectsOverlap(eb.x, eb.y, PS * 2, PS, st.px + PS, st.py + PS, rW - PS * 2, rH - PS * 2)) {
+            rectsOverlap(eb.x, eb.y, PS * 2, PS, st.px + PS, st.py + PS, rW - PS * 2, rH - PS * 2)) {
             st.lives--;
             setLives(st.lives);
             st.invincibleTimer = INVINCIBLE_TIME;
@@ -554,23 +589,26 @@ export default function AsteroidShooter({ onComplete, onStart }) {
             if (st.lives <= 0) { st.gameOver = true; setGameOver(true); sfxGameOver(); }
           }
         }
+      } // <--- END OF (!st.gameOver && !st.won) UPDATE BLOCK
 
-        // ─── Update explosions ────────
-        for (let i = st.explosions.length - 1; i >= 0; i--) {
-          st.explosions[i].age += dt;
-          if (st.explosions[i].age > 0.5) st.explosions.splice(i, 1);
-        }
+      // ─── ALWAYS UPDATE VISUALS (even when game over/won, let explosions finish) ───
+      // ─── Update explosions ────────
+      for (let i = st.explosions.length - 1; i >= 0; i--) {
+        st.explosions[i].age += dt;
+        if (st.explosions[i].age > 0.5) st.explosions.splice(i, 1);
+      }
 
-        // ─── Update particles ─────────
-        for (let i = st.particles.length - 1; i >= 0; i--) {
-          const p = st.particles[i];
-          p.x += p.vx * dt;
-          p.y += p.vy * dt;
-          p.life -= dt;
-          if (p.life <= 0) st.particles.splice(i, 1);
-        }
+      // ─── Update particles ─────────
+      for (let i = st.particles.length - 1; i >= 0; i--) {
+        const p = st.particles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.life -= dt;
+        if (p.life <= 0) st.particles.splice(i, 1);
+      }
 
-        // ─── Exhaust particles ────────
+      // ─── Exhaust particles ────────────────────────────────────────
+      if (!st.gameOver && !st.won) {
         if (Math.random() < 0.7) {
           st.particles.push({
             x: st.px - 2,
@@ -601,7 +639,7 @@ export default function AsteroidShooter({ onComplete, onStart }) {
         if (st.fireworkTimer <= 0) {
           const fx = W * 0.1 + Math.random() * W * 0.8;
           const fy = H * 0.1 + Math.random() * H * 0.45;
-          const fwC = ['#ff6b9d','#fbbf24','#4ade80','#60a5fa','#c084fc','#f472b6','#facc15','#34d399','#fb923c','#e879f9'];
+          const fwC = ['#ff6b9d', '#fbbf24', '#4ade80', '#60a5fa', '#c084fc', '#f472b6', '#facc15', '#34d399', '#fb923c', '#e879f9'];
           for (let p = 0; p < 35; p++) {
             const angle = (p / 35) * Math.PI * 2 + Math.random() * 0.4;
             const spd = 80 + Math.random() * 140;
@@ -677,6 +715,13 @@ export default function AsteroidShooter({ onComplete, onStart }) {
         const colors = u.elite ? UFO_COLORS_ELITE : UFO_COLORS;
         drawSprite(ctx, u.sprite, u.x, u.y, PS, colors, time);
         if (u.elite) {
+          // Elite shield bar (mini HP)
+          if (u.hp > 0 && u.hpMax > 1) {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(Math.floor(u.x), Math.floor(u.y - 8), u.w, 5);
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(Math.floor(u.x), Math.floor(u.y - 8), Math.floor(u.w * u.hp / u.hpMax), 5);
+          }
           ctx.globalAlpha = 0.15 + Math.sin(time * 8) * 0.1;
           ctx.fillStyle = '#ef4444';
           ctx.fillRect(Math.floor(u.x - 2), Math.floor(u.y - 2), u.w + 4, u.h + 4);
@@ -684,11 +729,23 @@ export default function AsteroidShooter({ onComplete, onStart }) {
         }
       }
 
+
+
+
       // ─── Draw player ───────────────
       if (!st.gameOver) {
         const visible = st.invincibleTimer <= 0 || Math.sin(time * 20) > 0;
         if (visible) {
-          drawSprite(ctx, ROCKET_SPRITE, st.px, st.py, PS, ROCKET_COLORS, time);
+          ctx.save();
+          const rW = ROCKET_COLS * PS;
+          const rH = ROCKET_ROWS * PS;
+          // Move to center of ship for rotation
+          ctx.translate(st.px + rW / 2, st.py + rH / 2);
+          // Rotate 90 degrees clockwise (facing right)
+          ctx.rotate(Math.PI / 2);
+          // Draw sprite offset back
+          drawSprite(ctx, ROCKET_SPRITE, -rW / 2, -rH / 2, PS, ROCKET_COLORS, time);
+          ctx.restore();
         }
       }
 
@@ -707,6 +764,8 @@ export default function AsteroidShooter({ onComplete, onStart }) {
           drawSprite(ctx, HEART_SPRITE, 16 + i * (hW + gap), 14, hPS, hCols, null);
         }
       }
+
+
 
       // ─── HUD — hint (top center) ───
       ctx.textAlign = 'center';
@@ -733,11 +792,11 @@ export default function AsteroidShooter({ onComplete, onStart }) {
         ctx.fillStyle = '#fce7f3';
         ctx.shadowColor = 'rgba(255, 107, 157, 0.9)';
         ctx.shadowBlur = 30;
-        ctx.fillText('\u{1F382} 🎂 HAPPY BIRTHDAY 🎂 \u{1F382}', W / 2, H / 2 - bdSz * 1.0);
+        ctx.fillText('\u{1f382} YOU WIN! HAPPY BIRTHDAY \u{1f382}', W / 2, H / 2 - bdSz * 1.0);
         ctx.font = `bold ${Math.max(20, Math.floor(bdSz * 0.6))}px monospace`;
         ctx.fillStyle = '#f9a8d4';
-        ctx.fillText('¡Feliz cumpleaños número 20,', W / 2, H / 2 - bdSz * 0.1);
-        ctx.fillText('Syafara amor mío!', W / 2, H / 2 + bdSz * 0.65);
+        ctx.fillText('ke-20 sayangkuuu', W / 2, H / 2 - bdSz * 0.1);
+        ctx.fillText('🎂🎂🎂🎂🎂🎂🎂🎂🎂🎂🎂🎂🎂🎂🎂🎂🎂🎂🎂🎂', W / 2, H / 2 + bdSz * 0.65);
         ctx.font = `${Math.max(14, Math.floor(bdSz * 0.4))}px monospace`;
         ctx.fillStyle = 'rgba(255, 220, 250, 0.75)';
       }
@@ -753,10 +812,10 @@ export default function AsteroidShooter({ onComplete, onStart }) {
         ctx.fillStyle = '#fca5a5';
         ctx.shadowColor = 'rgba(255, 100, 100, 0.6)';
         ctx.shadowBlur = 14;
-        ctx.fillText('GAME OVER', W / 2, H / 2 - 16);
+        ctx.fillText('KAMU KAYAH :(', W / 2, H / 2 - 16);
         ctx.font = `${Math.max(12, Math.floor(goFontMain * 0.55))}px monospace`;
         ctx.fillStyle = 'rgba(255, 220, 250, 0.7)';
-        ctx.fillText('tekan SPACE atau tap untuk ulangi', W / 2, H / 2 + 18);
+        ctx.fillText('tekan SPACE atau tap untuk main lagi', W / 2, H / 2 + 18);
         ctx.shadowBlur = 0;
       }
 
@@ -789,29 +848,99 @@ export default function AsteroidShooter({ onComplete, onStart }) {
           position: 'fixed', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'monospace', color: '#fce7f3',
-          cursor: 'pointer', userSelect: 'none',
-          background: 'transparent',
+          fontFamily: '"Press Start 2P", monospace',
+          color: '#fce7f3', cursor: 'pointer', userSelect: 'none',
           overflow: 'hidden',
         }}>
-          {/* Content */}
-          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <h1 style={{ fontSize: 'clamp(28px, 5vw, 56px)', margin: 0, color: '#ff6b9d', textShadow: '0 0 20px rgba(255,107,157,0.6), 0 0 60px rgba(255,107,157,0.2)' }}>
-              🚀 SELAMATKAN DUNIA!!! 🛸
+          <style>{`
+            @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+          `}</style>
+
+          {/* Warning grid animated canvas */}
+          <canvas
+            ref={(cvs) => {
+              if (!cvs || cvs._warnInit) return;
+              cvs._warnInit = true;
+              const ctx = cvs.getContext('2d');
+              const resize = () => { cvs.width = window.innerWidth; cvs.height = window.innerHeight; };
+              resize();
+              window.addEventListener('resize', resize);
+              const GRID = 48;
+              let frame = 0;
+              const loop = () => {
+                if (!cvs.isConnected) return;
+                frame++;
+                const W = cvs.width, H = cvs.height;
+                // Black base
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, W, H);
+                // Scrolling red pixel grid
+                const scroll = (frame * 0.6) % GRID;
+                ctx.strokeStyle = 'rgba(180, 0, 0, 0.35)';
+                ctx.lineWidth = 1;
+                for (let y = -GRID + scroll; y < H + GRID; y += GRID) {
+                  ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+                }
+                for (let x = 0; x < W; x += GRID) {
+                  ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+                }
+                // Pulsing red warning vignette
+                const pulse = 0.5 + 0.5 * Math.sin(frame * 0.09);
+                const grad = ctx.createRadialGradient(W / 2, H / 2, H * 0.15, W / 2, H / 2, Math.max(W, H) * 0.8);
+                grad.addColorStop(0, 'rgba(180,0,0,0)');
+                grad.addColorStop(0.5, 'rgba(180,0,0,0)');
+                grad.addColorStop(1, `rgba(200,0,0,${0.25 + pulse * 0.35})`);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, W, H);
+                // Scanlines
+                ctx.fillStyle = 'rgba(0,0,0,0.12)';
+                for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
+                requestAnimationFrame(loop);
+              };
+              requestAnimationFrame(loop);
+            }}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0 }}
+          />
+
+          {/* Pixel-art frosted panel, above canvas */}
+          <div style={{
+            position: 'relative', zIndex: 1,
+            background: 'rgba(8, 0, 0, 0.80)',
+            border: '3px solid rgba(220, 30, 30, 0.7)',
+            boxShadow: '4px 4px 0 #7f1d1d, inset 0 0 0 1px #450a0a, 0 0 30px rgba(220,0,0,0.25)',
+            padding: 'clamp(18px,3vw,36px) clamp(22px,4vw,52px)',
+            maxWidth: 'min(680px, 92vw)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.4rem',
+          }}>
+            <h1 style={{
+              fontSize: 'clamp(13px, 2.4vw, 28px)', margin: 0,
+              color: '#ff6b6b',
+              textShadow: '0 0 16px rgba(255,107,107,0.9), 3px 3px 0 #7f1d1d',
+              letterSpacing: '0.04em', textAlign: 'center', lineHeight: 1.6,
+            }}>
+              ⚠ DARURAT! ⚠<br />SELAMATKAN DUNIA!
             </h1>
-            <div style={{ marginTop: 32, fontSize: 'clamp(12px, 1.6vw, 18px)', lineHeight: 2.2, textAlign: 'left', color: 'rgba(255,220,250,0.85)' }}>
-              <div>"↑ ↓ ← →"  atau  "W A S D".....untuk bergerak</div>
-              <div>"SPACE"......................untuk menembak</div>
-              <div>"Tap & geser"................untuk mobile 📱</div>
-              <div style={{ marginTop: 16, textAlign: 'center' }}>Kalahkan alien jahattt! 👾</div>
-              <div style={{ textAlign: 'center' }}>TIPS: Kamu punya 3 nyawa, hindari peluru musuh!</div>
+            <div style={{
+              fontSize: 'clamp(7px, 1.1vw, 11px)', lineHeight: 2.8,
+              textAlign: 'left', color: 'rgba(255,210,210,0.9)',
+              letterSpacing: '0.04em',
+            }}>
+              <div>[ ↑ ↓ ← → ] atau [ W A S D ] — gerak</div>
+              <div>[ SPACE ] ————————————————— tembak</div>
+              <div>[ tap &amp; geser ] ———————————— mobile</div>
+              <div style={{ textAlign: 'center', marginTop: '8px', color: '#f87171' }}>kalahkan alien jahat! 👾</div>
+              <div style={{ textAlign: 'center', color: 'rgba(255,170,170,0.55)', fontSize: 'clamp(6px,0.9vw,9px)' }}>kamu punya 3 nyawa — hindari peluru musuh</div>
             </div>
-            <div style={{ marginTop: 48, fontSize: 'clamp(14px, 2vw, 22px)', color: '#fbbf24', animation: 'pulse 1.5s infinite', fontWeight: 'bold', textShadow: '0 0 12px rgba(251,191,36,0.4)' }}>
-              Tekan tombol apa saja untuk mulai Penyelamatann!!!
+            <div style={{
+              fontSize: 'clamp(8px, 1.2vw, 13px)',
+              color: '#fbbf24',
+              textShadow: '0 0 10px rgba(251,191,36,0.6), 2px 2px 0 #78350f',
+              animation: 'pulse 1.0s ease-in-out infinite',
+              textAlign: 'center', letterSpacing: '0.06em',
+            }}>
+              &gt; TEKAN APA SAJA UNTUK MULAI &lt;
             </div>
           </div>
-
-          <style>{`@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }`}</style>
         </div>
       )}
       <canvas
