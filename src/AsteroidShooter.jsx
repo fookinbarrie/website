@@ -810,10 +810,10 @@ export default function AsteroidShooter({ onComplete, onStart }) {
         ctx.fillStyle = '#fca5a5';
         ctx.shadowColor = 'rgba(255, 100, 100, 0.6)';
         ctx.shadowBlur = 14;
-        ctx.fillText('KAMU KAYAH :(', W / 2, H / 2 - 16);
+        ctx.fillText('GAME OVER :(', W / 2, H / 2 - 16);
         ctx.font = `${Math.max(12, Math.floor(goFontMain * 0.55))}px monospace`;
         ctx.fillStyle = 'rgba(255, 220, 250, 0.7)';
-        ctx.fillText('tekan SPACE atau tap untuk main lagi', W / 2, H / 2 + 18);
+        ctx.fillText('gapapaa tekan SPACE buat main lagi yaa', W / 2, H / 2 + 18);
         ctx.shadowBlur = 0;
       }
 
