@@ -281,15 +281,15 @@ export default function PasswordPage({ onUnlock, onGameComplete }) {
       shootTimerRef.current -= dt;
       if (shootTimerRef.current <= 0 && shootActiveRef.current) {
         const angle = rand(20, 48) * Math.PI / 180;
-        shootingStarRef.current = { 
-          x: rand(canvas.width * .1, canvas.width * .55), 
-          y: rand(canvas.height * .05, canvas.height * .32), 
-          angle, len: 0, maxLen: rand(180, 340), 
-          speed: rand(900, 1300), alpha: 1, done: false 
+        shootingStarRef.current = {
+          x: rand(canvas.width * .1, canvas.width * .55),
+          y: rand(canvas.height * .05, canvas.height * .32),
+          angle, len: 0, maxLen: rand(180, 340),
+          speed: rand(900, 1300), alpha: 1, done: false
         };
         shootTimerRef.current = 10 + rand(-1, 2);
       }
-      
+
       drawBg(ctx, canvas.width, canvas.height, t, dt, stars, clouds, ufos, cData,
         phaseRef.current, bgAlphaRef.current, showFullBgRef.current, shootActiveRef.current, uiAlphaRef.current, shootingStarRef);
       raf = requestAnimationFrame(loop);
