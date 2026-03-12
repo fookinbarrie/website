@@ -87,6 +87,7 @@ function App() {
       }
       if (buf.current.endsWith('kocak')) {
         buf.current = '';
+        setScrapbookReady(true);
         unlock();
       }
     };
@@ -106,7 +107,15 @@ function App() {
       {(scrapbookReady || isUnlocked) && (
         <div
           className="w-screen h-screen theme-darkpink"
-          style={{ pointerEvents: isUnlocked ? 'auto' : 'none' }}
+          style={{ 
+            pointerEvents: isUnlocked ? 'auto' : 'none',
+            opacity: (scrapbookReady || isUnlocked) ? 1 : 0,
+            transition: 'opacity 2s ease-in-out',
+            transitionDelay: '1s', // Start fading in at second 1 of transition
+            position: 'absolute',
+            inset: 0,
+            zIndex: 5
+          }}
         >
           {isUnlocked && <NyanCursor />}
           <ReactFlow

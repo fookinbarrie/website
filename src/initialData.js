@@ -7,9 +7,9 @@ const decorations = [
   { id: 'd4', emoji: '🎀', x: -738, y: -308 },
   { id: 'd5', emoji: '🩷', x: 15, y: 8 },
   { id: 'd6', emoji: '💕', x: 585, y: -360 },
-  { id: 'd7', emoji: '✨', x: 243, y: 311 },
+  { id: 'd7', emoji: '✨', x: -85, y: 298 },
   { id: 'd8', emoji: '✨', x: 378, y: -87 },
-  { id: 'd9', emoji: '🌸', x: -407, y: -49 },
+  { id: 'd9', emoji: '🌸', x: -429, y: -55 },
   { id: 'd10', emoji: '🎀', x: -127, y: 630 },
 ].map((d) => ({
   id: d.id,
@@ -27,7 +27,7 @@ const contentNodes = [
   {
     id: 'n-hero',
     type: 'image',
-    position: { x: 33, y: 26 },
+    position: { x: 43, y: 29 },
     data: {
       date: '✨',
       url: '/hero/star.jpg',
@@ -66,7 +66,7 @@ const contentNodes = [
   {
     id: 'n-love1',
     type: 'note',
-    position: { x: -407, y: 69 },
+    position: { x: -451, y: 21 },
     data: {
       bg: '#fef9c3',
       rotate: '-3deg',
@@ -165,7 +165,7 @@ const contentNodes = [
   {
     id: 'n-candle',
     type: 'sticker',
-    position: { x: -315, y: 106 },
+    position: { x: -381, y: 80 },
     zIndex: 10,
     data: {
       url: '/stickers/20.png',
@@ -248,7 +248,7 @@ const contentNodes = [
   {
     id: 'n-cat',
     type: 'sticker',
-    position: { x: -179, y: -2 },
+    position: { x: -198, y: -5 },
     zIndex: 10,
     data: {
       url: '/stickers/cat.png',

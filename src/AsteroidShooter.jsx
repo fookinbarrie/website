@@ -13,9 +13,7 @@ const MAX_LIVES = 3;
 const INVINCIBLE_TIME = 1.6;
 const PS = 6; // pixel scale for sprites — BIG chunky pixel art
 
-// ─── Game audio (placeholder — user will add their own file) ──────────────
-// Drop your game music file into public/audio/ and update the path below:
-const GAME_AUDIO_SRC = '/audio/game-bgm.mp3'; // ← GANTI DENGAN FILE AUDIO GAME KAMU
+const GAME_AUDIO_SRC = '/audio/game-bgm.mp3';
 
 // ─── Sprites ──────────────────────────────────────────────────────────────
 const ROCKET_SPRITE = [
@@ -792,7 +790,7 @@ export default function AsteroidShooter({ onComplete, onStart }) {
         ctx.fillStyle = '#fce7f3';
         ctx.shadowColor = 'rgba(255, 107, 157, 0.9)';
         ctx.shadowBlur = 30;
-        ctx.fillText('\u{1f382} YOU WIN! HAPPY BIRTHDAY \u{1f382}', W / 2, H / 2 - bdSz * 1.0);
+        ctx.fillText('YOU WIN! HAPPY BIRTHDAY', W / 2, H / 2 - bdSz * 1.0);
         ctx.font = `bold ${Math.max(20, Math.floor(bdSz * 0.6))}px monospace`;
         ctx.fillStyle = '#f9a8d4';
         ctx.fillText('ke-20 sayangkuuu', W / 2, H / 2 - bdSz * 0.1);
